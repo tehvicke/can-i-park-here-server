@@ -35,12 +35,10 @@ jobs:
 
       # run tests!
       - run: npm test
-    
+
     # Deploy to Heroku
   deploy:
     steps:
       - checkout
 
-      -run: git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git master
-
-
+      - run: git push https://heroku:$HEROKU_API_KEY@git.heroku.com/$HEROKU_APP_NAME.git master
