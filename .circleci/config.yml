@@ -50,6 +50,8 @@ jobs:
 
     # Deploy to Heroku
   deploy:
+    machine:
+      enabled: true
     steps:
       - checkout
 
