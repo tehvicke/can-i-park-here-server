@@ -4,7 +4,7 @@ const app = express()
 
 app.get('/', (req, res, next) => {
   try {
-    res.send('Hej')
+    res.json({ message: 'woho' })
   } catch (err) {
     next(err)
   }
