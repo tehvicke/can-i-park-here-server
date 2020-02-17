@@ -26,7 +26,7 @@ describe('server is up', () => {
   it('responds', async () => {
     await request(server)
       .get('/')
-      .expect(400)
+      .expect(200)
   }),
     it('shows 404 error if using wrong endpoint', async () => {
       await request(server)
