@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 import app from './src/app.js'
 
 const port = process.env.PORT || 8080
-const mongoUrl = process.env.MONGO_URL || 'mongodb://localhost/can-i-park-here'
+const mongoUrl = process.env.MONGO_URL || 'mongodb://localhost/can-i-park-here '
 
 mongoose.connect(mongoUrl, { useNewUrlParser: true, useUnifiedTopology: true })
 mongoose.Promise = Promise
