@@ -1,7 +1,9 @@
 import { request } from 'request'
+import CityAPI from './cityAPI.js'
 
-class StockholmAPI => {
+class StockholmAPI extends CityAPI {
   constructor() {
+    super()
     this.baseURL = 'https://openparking.stockholm.se/LTF-Tolken/v1/'
     this.maxFeatures = 100
     this.format = 'json'
@@ -12,8 +14,8 @@ class StockholmAPI => {
     return data
   }
 
-  async getDataWithin(lat, long, radius) {
-    return null
+  getDataWithin(lat, long, radius) {
+    return this.getTest()
   }
 }
 

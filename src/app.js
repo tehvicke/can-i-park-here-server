@@ -1,10 +1,12 @@
 import express from 'express'
+import { getParkingData } from './lib/location/locationService'
 
 const app = express()
 
 app.get('/', (req, res, next) => {
   try {
-    res.json({ message: 'woho' })
+    console.log(getParkingData(1, 2, 3))
+    res.send('hej')
   } catch (err) {
     next(err)
   }
