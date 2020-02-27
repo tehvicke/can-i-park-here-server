@@ -1,12 +1,25 @@
 import express from 'express'
 import { getParkingData } from './lib/location/locationService'
 
+/* Lat/Long Fredhäll, Adlerbethsgatan 17 */
+const testA = {
+  lat: 59.331117,
+  long: 18.005072,
+  radius: 50
+}
+/* Lat/Long Oslo, Rubina Ranas gate 14-12 */
+const testB = {
+  lat: 59.911311,
+  long: 10.764739,
+  radius: 100
+}
 const app = express()
 
-app.get('/', (req, res, next) => {
+app.get('/', async (req, res, next) => {
+  const { lat, long, radius } = testA
   try {
-    console.log(getParkingData(1, 2, 3))
-    res.send('hej')
+    const data = await getParkingData(lat, long, radius)
+    res.send(data)
   } catch (err) {
     next(err)
   }
