@@ -16,7 +16,8 @@ const testB = {
 const app = express()
 
 app.get('/', async (req, res, next) => {
-  const { lat, long, radius } = testA
+  // const { lat, long, radius } = testA
+  const { lat, long, radius } = req.params
   try {
     const data = await getParkingData(lat, long, radius)
     res.send(data)

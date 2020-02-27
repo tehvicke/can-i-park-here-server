@@ -1,7 +1,7 @@
 import StockholmAPI from '../../datasources/stockholm'
 import axios from 'axios'
-import dotenv from 'dotenv'
 
+import dotenv from 'dotenv'
 dotenv.config()
 
 const sthlm = new StockholmAPI()
