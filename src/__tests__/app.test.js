@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import request from 'supertest'
 import 'babel-polyfill'
 import app from '../app.js'
@@ -25,7 +28,7 @@ afterAll(done => {
 describe('server is up', () => {
   it('responds', async () => {
     await request(server)
-      .get('/')
+      .get('/?lat=59.338547&long=18.067099&radius=100')
       .expect(200)
   }),
     it('shows 404 error if using wrong endpoint', async () => {
