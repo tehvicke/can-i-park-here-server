@@ -17,7 +17,8 @@ const app = express()
 
 app.get('/', async (req, res, next) => {
   // const { lat, long, radius } = testA
-  const { lat, long, radius } = req.params
+  const { lat, long, radius } = req.query
+  console.log(req.query)
   try {
     const data = await getParkingData(lat, long, radius)
     res.send(data)
