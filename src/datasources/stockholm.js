@@ -8,7 +8,7 @@ class StockholmAPI extends CityAPI {
   constructor() {
     super()
     this.baseURL = 'https://openparking.stockholm.se/LTF-Tolken/v1/ptillaten/within/'
-    this.maxFeatures = 200
+    this.maxFeatures = 100
     this.format = 'json'
     this.apiKey = process.env.STOCKHOLM_API_KEY
   }
