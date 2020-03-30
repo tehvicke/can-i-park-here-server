@@ -19,7 +19,7 @@ const app = express()
 app.use(cors())
 app.use(bodyParser.json())
 
-app.get('/', async (req, res, next) => {
+app.get('/api/v1', async (req, res, next) => {
   // const { lat, long, radius } = testA
   const { lat, long, radius } = req.query
   console.log(req.query)
