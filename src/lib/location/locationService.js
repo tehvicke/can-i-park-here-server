@@ -10,7 +10,7 @@ const apiKey = process.env.MAPBOX_API_KEY
 /* TODO: Implement function to retrieve city to determine which API to use */
 const getCity = async (lat, long) => {
   const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${long},${lat}.json?types=place&access_token=${apiKey}`
-  console.log(url)
+  // console.log(url)
   const data = await axios.get(url).then(response => response.data)
   return data.features[0].text
 }
