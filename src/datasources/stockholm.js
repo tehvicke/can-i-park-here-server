@@ -16,7 +16,7 @@ class StockholmAPI extends CityAPI {
   constructor() {
     super()
     this.baseURL = 'https://openparking.stockholm.se/LTF-Tolken/v1/ptillaten/within/'
-    this.maxFeatures = 100
+    this.maxFeatures = 10
     this.format = 'json'
     this.apiKey = process.env.STOCKHOLM_API_KEY
   }
@@ -42,10 +42,6 @@ class StockholmAPI extends CityAPI {
   }
 
   stockholmReducer(data) {
-    if (!this.regulationIsValid(data.properties)) {
-      return undefined
-    }
-
     const regulation = new Regulation(
       data.id,
       getRegulationType(data.properties.VF_PLATS_TYP),
@@ -56,21 +52,18 @@ class StockholmAPI extends CityAPI {
       data.geometry
     )
 
-    /* Assign time when parking is not allowed */
+    /* Assign time when parking is allowed */
     const endWeekday =
       data.properties.END_WEEKDAY ||
       data.properties
         .START_WEEKDAY /* For most cases start and end weekday will be the same, so end will get value of start_weekday */
-
-    regulation.setParkingUnallowedTime(
-      getWeekday(endWeekday),
-      getTime(data.properties.END_TIME),
+    regulation.setParkingAllowedTime(
       getWeekday(data.properties.START_WEEKDAY),
-      getTime(data.properties.START_TIME)
+      getTime(data.properties.START_TIME),
+      getWeekday(endWeekday),
+      getTime(data.properties.END_TIME)
     )
 
-    console.log(regulation)
-    // console.log(data.properties)
     return regulation
   }
 
@@ -83,10 +76,12 @@ class StockholmAPI extends CityAPI {
       if (apiVersion === 'v1') {
         return response.data
       } else if (apiVersion === 'v2') {
-        response.data.features.map(feature => {
+        let newFormat = response.data.features.filter(feature => this.regulationIsValid(feature.properties))
+
+        console.log(newFormat)
+        return newFormat.map(feature => {
           return this.stockholmReducer(feature)
         })
-        return response.data
       }
     })
   }
