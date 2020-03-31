@@ -16,7 +16,7 @@ class StockholmAPI extends CityAPI {
   constructor() {
     super()
     this.baseURL = 'https://openparking.stockholm.se/LTF-Tolken/v1/ptillaten/within/'
-    this.maxFeatures = 10
+    this.maxFeatures = 100
     this.format = 'json'
     this.apiKey = process.env.STOCKHOLM_API_KEY
   }
@@ -60,11 +60,11 @@ class StockholmAPI extends CityAPI {
     regulation.setParkingAllowedTime(
       getWeekday(data.properties.START_WEEKDAY),
       getTime(data.properties.START_TIME),
-      getWeekday(endWeekday),
+      getWeekday(endWeekday) + 7,
       getTime(data.properties.END_TIME)
     )
-
-    return regulation
+    data.properties = regulation
+    return data
   }
 
   getDataWithin(lat, long, radius, apiVersion) {
@@ -72,15 +72,14 @@ class StockholmAPI extends CityAPI {
     console.log(url)
 
     return axios.get(url).then(response => {
-      console.log(response.data.features.length)
       if (apiVersion === 'v1') {
         return response.data
       } else if (apiVersion === 'v2') {
         let newFormat = response.data.features.filter(feature => this.regulationIsValid(feature.properties))
 
-        console.log(newFormat)
         return newFormat.map(feature => {
-          return this.stockholmReducer(feature)
+          const res = this.stockholmReducer(feature)
+          return res
         })
       }
     })

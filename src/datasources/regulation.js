@@ -1,6 +1,6 @@
 import moment from 'moment'
 class Regulation {
-  constructor(id, type, typeDesc, vehicle, address, url, geometry) {
+  constructor(id, type, typeDesc, vehicle, address, url) {
     this.id = id
     this.type = type
     this.typeDesc = typeDesc
@@ -12,7 +12,6 @@ class Regulation {
       start: undefined,
       end: undefined
     }
-    this.geometry = geometry
   }
 
   /**
@@ -23,11 +22,16 @@ class Regulation {
    * @param {Date Time on endWeekday after which the citation is no longer active (i.e. allowed to park again)} endTime
    */
   setParkingAllowedTime(startWeekday, startTime, endWeekday, endTime) {
-    if (!startWeekday && !startTime && !endWeekday && !endTime) return
+    if (!startWeekday && !startTime && !endWeekday && !endTime) {
+      startWeekday = 1
+      startTime = '0000'
+      endWeekday = 8
+      endTime = '0000'
+    }
 
     const todayWeekday = moment().isoWeekday()
 
-    const startWeekdayDiff = todayWeekday - startWeekday + 7
+    const startWeekdayDiff = (todayWeekday - startWeekday + 7) % 7
     const endWeekdayDiff = endWeekday - todayWeekday
 
     const startDateString = moment()
