@@ -20,11 +20,21 @@ app.use(cors())
 app.use(bodyParser.json())
 
 app.get('/api/v1', async (req, res, next) => {
-  // const { lat, long, radius } = testA
   const { lat, long, radius } = req.query
   console.log(req.query)
   try {
-    const data = await getParkingData(lat, long, radius)
+    const data = await getParkingData(lat, long, radius, 'v1')
+    res.send(data)
+  } catch (err) {
+    next(err)
+  }
+})
+
+app.get('/api/v2', async (req, res, next) => {
+  const { lat, long, radius } = req.query
+  console.log(req.query)
+  try {
+    const data = await getParkingData(lat, long, radius, 'v2')
     res.send(data)
   } catch (err) {
     next(err)

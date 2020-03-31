@@ -71,20 +71,23 @@ class StockholmAPI extends CityAPI {
 
     console.log(regulation)
     // console.log(data.properties)
-    return data
+    return regulation
   }
 
-  getDataWithin(lat, long, radius) {
+  getDataWithin(lat, long, radius, apiVersion) {
     const url = `${this.baseURL}?radius=${radius}&lat=${lat}&lng=${long}&maxFeatures=${this.maxFeatures}&outputFormat=${this.format}&apiKey=${this.apiKey}`
     console.log(url)
 
     return axios.get(url).then(response => {
       console.log(response.data.features.length)
-      response.data.features.map(feature => {
-        return this.stockholmReducer(feature)
-      })
-
-      return response.data
+      if (apiVersion === 'v1') {
+        return response.data
+      } else if (apiVersion === 'v2') {
+        response.data.features.map(feature => {
+          return this.stockholmReducer(feature)
+        })
+        return response.data
+      }
     })
   }
 }
