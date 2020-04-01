@@ -59,9 +59,9 @@ class Regulation {
 
     this.parkingAllowedTime.start = startDate.format()
     this.parkingAllowedTime.end = endDate.format()
-    console.log(
-      `StartDate: ${startDate.format()}, , Today: ${usersTimeFormatted.format()}, EndDate: ${endDate.format()}`
-    )
+    // console.log(
+    //   `StartDate: ${startDate.format()}, , Today: ${usersTimeFormatted.format()}, EndDate: ${endDate.format()}`
+    // )
   }
 }
 
