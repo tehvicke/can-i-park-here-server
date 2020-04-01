@@ -70,10 +70,7 @@ class StockholmAPI extends CityAPI {
   }
 
   getDataWithin(lat, long, radius, time, apiVersion) {
-    // const url = `${this.baseURL}?radius=${radius}&lat=${lat}&lng=${long}&maxFeatures=${this.maxFeatures}&outputFormat=${this.format}&apiKey=${this.apiKey}`
-    const url = `${this.baseURL}?radius=${5}&lat=${lat}&lng=${long}&maxFeatures=${5}&outputFormat=${
-      this.format
-    }&apiKey=${this.apiKey}`
+    const url = `${this.baseURL}?radius=${radius}&lat=${lat}&lng=${long}&maxFeatures=${this.maxFeatures}&outputFormat=${this.format}&apiKey=${this.apiKey}`
     this.time = time
     console.log(url)
 
