@@ -23,7 +23,7 @@ app.get('/api/v1', async (req, res, next) => {
   const { lat, long, radius } = req.query
   console.log(req.query)
   try {
-    const data = await getParkingData(lat, long, radius, 'v1')
+    const data = await getParkingData(lat, long, radius, time, 'v1')
     res.send(data)
   } catch (err) {
     next(err)
@@ -31,10 +31,10 @@ app.get('/api/v1', async (req, res, next) => {
 })
 
 app.get('/api/v2', async (req, res, next) => {
-  const { lat, long, radius } = req.query
+  const { lat, long, radius, time } = req.query
   console.log(req.query)
   try {
-    const data = await getParkingData(lat, long, radius, 'v2')
+    const data = await getParkingData(lat, long, radius, time, 'v2')
     res.send(data)
   } catch (err) {
     next(err)

@@ -15,12 +15,12 @@ const getCity = async (lat, long) => {
   return data.features[0].text
 }
 
-const getParkingData = async (lat, long, radius, apiVersion) => {
+const getParkingData = async (lat, long, radius, time, apiVersion) => {
   const city = await getCity(lat, long)
   console.log(city)
   switch (city) {
     case 'Stockholm':
-      return sthlm.getDataWithin(lat, long, radius, apiVersion)
+      return sthlm.getDataWithin(lat, long, radius, time, apiVersion)
     default:
       throw new Error(`API for parking data in ${city} is not yet defined.`)
   }

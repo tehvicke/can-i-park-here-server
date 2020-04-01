@@ -21,28 +21,47 @@ class Regulation {
    * @param {Number Weekday when the citation is active (i.e. forbidden to park. Defaulsts to startWeekday if undefined} endWeekday
    * @param {Date Time on endWeekday after which the citation is no longer active (i.e. allowed to park again)} endTime
    */
-  setParkingAllowedTime(startWeekday, startTime, endWeekday, endTime) {
+  setParkingAllowedTime(startWeekday, startTime, endWeekday, endTime, usersTime) {
     if (!startWeekday && !startTime && !endWeekday && !endTime) {
+      /* If these values are missing then parking is never allowed */
       startWeekday = 1
       startTime = '0000'
-      endWeekday = 8
+      endWeekday = 1
       endTime = '0000'
     }
+    const usersTimeFormatted = moment(
+      usersTime,
+      'YYYY-MM-DDTHH:mm:ss ZZ'
+    ) /* Some weird formatting issues when sending dates so have to reformat it here */
 
-    const todayWeekday = moment().isoWeekday()
+    const todayWeekday = usersTimeFormatted.isoWeekday()
 
-    const startWeekdayDiff = (todayWeekday - startWeekday + 7) % 7
+    //console.log(`StartWeekday: ${startWeekday}, TodaysWeekday: ${todayWeekday}, EndWeekday: ${endWeekday}`)
+
+    const startWeekdayDiff = startWeekday - todayWeekday
     const endWeekdayDiff = endWeekday - todayWeekday
 
-    const startDateString = moment()
-      .subtract(startWeekdayDiff, 'd')
+    const startDateString = moment(usersTimeFormatted.format())
+      .add(startWeekdayDiff, 'd')
       .format('YYYY-MM-DD')
-    const endDateString = moment()
+    const endDateString = moment(usersTimeFormatted.format())
       .add(endWeekdayDiff, 'd')
       .format('YYYY-MM-DD')
 
-    this.parkingAllowedTime.start = moment(startDateString + ' ' + startTime, 'YYYY-MM-DD hhmm').format()
-    this.parkingAllowedTime.end = moment(endDateString + ' ' + endTime, 'YYYY-MM-DD hhmm').format()
+    let startDate = moment(startDateString + ' ' + startTime, 'YYYY-MM-DD hhmm')
+    let endDate = moment(endDateString + ' ' + endTime, 'YYYY-MM-DD hhmm')
+
+    /* Adjust period to the week before if startTime is after the users time */
+    if (usersTimeFormatted < startDate) {
+      startDate.subtract(7, 'd')
+      endDate.subtract(7, 'd')
+    }
+
+    this.parkingAllowedTime.start = startDate.format()
+    this.parkingAllowedTime.end = endDate.format()
+    console.log(
+      `StartDate: ${startDate.format()}, , Today: ${usersTimeFormatted.format()}, EndDate: ${endDate.format()}`
+    )
   }
 }
 

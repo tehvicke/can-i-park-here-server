@@ -19,6 +19,7 @@ class StockholmAPI extends CityAPI {
     this.maxFeatures = 100
     this.format = 'json'
     this.apiKey = process.env.STOCKHOLM_API_KEY
+    this.time = undefined
   }
 
   regulationIsValid(prop) {
@@ -61,14 +62,19 @@ class StockholmAPI extends CityAPI {
       getWeekday(data.properties.START_WEEKDAY),
       getTime(data.properties.START_TIME),
       getWeekday(endWeekday) + 7,
-      getTime(data.properties.END_TIME)
+      getTime(data.properties.END_TIME),
+      this.time
     )
     data.properties = regulation
     return data
   }
 
-  getDataWithin(lat, long, radius, apiVersion) {
-    const url = `${this.baseURL}?radius=${radius}&lat=${lat}&lng=${long}&maxFeatures=${this.maxFeatures}&outputFormat=${this.format}&apiKey=${this.apiKey}`
+  getDataWithin(lat, long, radius, time, apiVersion) {
+    // const url = `${this.baseURL}?radius=${radius}&lat=${lat}&lng=${long}&maxFeatures=${this.maxFeatures}&outputFormat=${this.format}&apiKey=${this.apiKey}`
+    const url = `${this.baseURL}?radius=${5}&lat=${lat}&lng=${long}&maxFeatures=${5}&outputFormat=${
+      this.format
+    }&apiKey=${this.apiKey}`
+    this.time = time
     console.log(url)
 
     return axios.get(url).then(response => {

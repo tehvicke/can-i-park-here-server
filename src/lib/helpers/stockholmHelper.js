@@ -42,7 +42,7 @@ const getWeekday = weekday => {
 }
 
 const getTime = time => {
-  if (!time) return undefined
+  if (time === undefined) return undefined
   time = '' + time
   switch (time.length) {
     case 1:
