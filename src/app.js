@@ -20,7 +20,7 @@ app.use(cors())
 app.use(bodyParser.json())
 
 app.get('/api/v1', async (req, res, next) => {
-  const { lat, long, radius } = req.query
+  const { lat, long, radius, time } = req.query
   console.log(req.query)
   try {
     const data = await getParkingData(lat, long, radius, time, 'v1')
