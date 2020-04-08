@@ -29,9 +29,7 @@ class Regulation {
       endWeekday = 1
       endTime = '0000'
     }
-    const usersTimeFormatted = moment(
-      usersTime
-    ) /* Some weird formatting issues when sending dates so have to reformat it here */
+    const usersTimeFormatted = moment(usersTime)
 
     const todayWeekday = usersTimeFormatted.isoWeekday()
 
@@ -43,8 +41,11 @@ class Regulation {
     const startDateString = moment(usersTimeFormatted.format()).add(startWeekdayDiff, 'd').format('YYYY-MM-DD')
     const endDateString = moment(usersTimeFormatted.format()).add(endWeekdayDiff, 'd').format('YYYY-MM-DD')
 
-    let startDate = moment(startDateString + ' ' + startTime, 'YYYY-MM-DD hhmm')
-    let endDate = moment(endDateString + ' ' + endTime, 'YYYY-MM-DD hhmm')
+    let startDate = moment(
+      startDateString + ' ' + startTime + ' ' + usersTimeFormatted.format('ZZ'),
+      'YYYY-MM-DD hhmm ZZ'
+    )
+    let endDate = moment(endDateString + ' ' + endTime + ' ' + usersTimeFormatted.format('ZZ'), 'YYYY-MM-DD hhmm ZZ')
 
     /* Adjust period to the week before if startTime is after the users time */
     if (usersTimeFormatted < startDate) {
