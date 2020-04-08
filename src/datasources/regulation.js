@@ -40,8 +40,11 @@ class Regulation {
     const startWeekdayDiff = startWeekday - todayWeekday
     const endWeekdayDiff = endWeekday - todayWeekday
 
-    const startDate = moment(startTime.add(startWeekdayDiff, 'd')
-    const endDate = moment(endTime.format()).add(endWeekdayDiff, 'd')
+    const startDateString = moment(usersTimeFormatted.format()).add(startWeekdayDiff, 'd').format('YYYY-MM-DD')
+    const endDateString = moment(usersTimeFormatted.format()).add(endWeekdayDiff, 'd').format('YYYY-MM-DD')
+
+    let startDate = moment(startDateString + ' ' + startTime, 'YYYY-MM-DD hhmm')
+    let endDate = moment(endDateString + ' ' + endTime, 'YYYY-MM-DD hhmm')
 
     /* Adjust period to the week before if startTime is after the users time */
     if (usersTimeFormatted < startDate) {
