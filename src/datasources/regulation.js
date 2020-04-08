@@ -30,8 +30,7 @@ class Regulation {
       endTime = '0000'
     }
     const usersTimeFormatted = moment(
-      usersTime,
-      'YYYY-MM-DDTHH:mm:ss ZZ'
+      usersTime
     ) /* Some weird formatting issues when sending dates so have to reformat it here */
 
     const todayWeekday = usersTimeFormatted.isoWeekday()
