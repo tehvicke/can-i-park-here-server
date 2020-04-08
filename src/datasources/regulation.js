@@ -1,4 +1,5 @@
 import moment from 'moment'
+import momentTz from 'moment-timezone'
 import 'moment/locale/sv'
 
 class Regulation {
@@ -34,7 +35,7 @@ class Regulation {
 
     console.log('String: ', usersTime)
     moment.locale('sv')
-    const usersTimeFormatted = moment(usersTime)
+    const usersTimeFormatted = momentTz(usersTime)
     console.log('Moment: ', usersTimeFormatted.format())
     const todayWeekday = usersTimeFormatted.isoWeekday()
 
