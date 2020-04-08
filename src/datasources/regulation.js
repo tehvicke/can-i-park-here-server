@@ -31,9 +31,10 @@ class Regulation {
       endWeekday = 1
       endTime = '0000'
     }
-    moment.locale('en-ca')
-    const usersTimeFormatted = moment(usersTime)
 
+    console.log('String: ', usersTime)
+    const usersTimeFormatted = moment(usersTime)
+    console.log('Moment: ', usersTimeFormatted.format())
     const todayWeekday = usersTimeFormatted.isoWeekday()
 
     //console.log(`StartWeekday: ${startWeekday}, TodaysWeekday: ${todayWeekday}, EndWeekday: ${endWeekday}`)
@@ -62,9 +63,9 @@ class Regulation {
       endDateNew.subtract(7, 'd')
     }
 
-    // console.log(
-    //   `StartDateNew: ${startDateNew.format()}, , Today: ${usersTimeFormatted.format()}, EndDateNew: ${endDateNew.format()}`
-    // )
+    console.log(
+      `StartDateNew: ${startDateNew.format()}, , Today: ${usersTimeFormatted.format()}, EndDateNew: ${endDateNew.format()}`
+    )
 
     this.parkingAllowedTime.start = startDateNew.format()
     this.parkingAllowedTime.end = endDateNew.format()
