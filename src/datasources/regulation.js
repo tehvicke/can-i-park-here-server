@@ -1,5 +1,5 @@
 import moment from 'moment'
-import 'moment/locale/en-ca'
+import 'moment/locale/sv'
 
 class Regulation {
   constructor(id, type, typeDesc, vehicle, address, url) {
@@ -33,6 +33,7 @@ class Regulation {
     }
 
     console.log('String: ', usersTime)
+    moment.locale('sv')
     const usersTimeFormatted = moment(usersTime)
     console.log('Moment: ', usersTimeFormatted.format())
     const todayWeekday = usersTimeFormatted.isoWeekday()
