@@ -1,4 +1,6 @@
 import moment from 'moment'
+import 'moment/locale/en-ca'
+
 class Regulation {
   constructor(id, type, typeDesc, vehicle, address, url) {
     this.id = id
@@ -29,6 +31,7 @@ class Regulation {
       endWeekday = 1
       endTime = '0000'
     }
+    moment.locale('en-ca')
     const usersTimeFormatted = moment(usersTime)
 
     const todayWeekday = usersTimeFormatted.isoWeekday()
@@ -41,20 +44,30 @@ class Regulation {
     const startDateString = moment(usersTimeFormatted.format()).add(startWeekdayDiff, 'd').format('YYYY-MM-DD')
     const endDateString = moment(usersTimeFormatted.format()).add(endWeekdayDiff, 'd').format('YYYY-MM-DD')
 
-    let startDate = moment(
-      startDateString + ' ' + startTime + ' ' + usersTimeFormatted.format('ZZ'),
-      'YYYY-MM-DD hhmm ZZ'
-    )
-    let endDate = moment(endDateString + ' ' + endTime + ' ' + usersTimeFormatted.format('ZZ'), 'YYYY-MM-DD hhmm ZZ')
+    let startDateNew = moment(usersTimeFormatted)
+      .add(startWeekdayDiff, 'd')
+      .set({ hour: startTime.substring(0, 2), minute: startTime.substring(2, 2) })
+    let endDateNew = moment(usersTimeFormatted)
+      .add(endWeekdayDiff, 'd')
+      .set({ hour: endTime.substring(0, 2), minute: endTime.substring(2, 2) })
+
+    let startDate = moment(startDateString + ' ' + startTime, 'YYYY-MM-DD hhmm')
+    let endDate = moment(endDateString + ' ' + endTime, 'YYYY-MM-DD hhmm')
 
     /* Adjust period to the week before if startTime is after the users time */
     if (usersTimeFormatted < startDate) {
       startDate.subtract(7, 'd')
       endDate.subtract(7, 'd')
+      startDateNew.subtract(7, 'd')
+      endDateNew.subtract(7, 'd')
     }
 
-    this.parkingAllowedTime.start = startDate.format()
-    this.parkingAllowedTime.end = endDate.format()
+    // console.log(
+    //   `StartDateNew: ${startDateNew.format()}, , Today: ${usersTimeFormatted.format()}, EndDateNew: ${endDateNew.format()}`
+    // )
+
+    this.parkingAllowedTime.start = startDateNew.format()
+    this.parkingAllowedTime.end = endDateNew.format()
     // console.log(
     //   `StartDate: ${startDate.format()}, , Today: ${usersTimeFormatted.format()}, EndDate: ${endDate.format()}`
     // )
