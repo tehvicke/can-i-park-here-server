@@ -1,6 +1,6 @@
 /* Helper functions for the Stockholm API implementation */
 
-const checkOddEvenWeek = oddEven => {
+const checkOddEvenWeek = (oddEven) => {
   switch (oddEven) {
     case undefined:
       return undefined
@@ -10,21 +10,21 @@ const checkOddEvenWeek = oddEven => {
       return 0
   }
 }
-const getRegulationType = type => {
+const getRegulationType = (type) => {
   switch (type) {
     case 'P Avgift, boende':
       return 'TIME_RESTRICTED'
     case 'Tidsreglerad lastplats':
-      return 'TIME_RESTRICTED'
+      return 'TIME_RESTRICTED_LOADING'
     case 'Reserverad p-plats motorcykel':
-      return 'TIME_RESTRICTED'
+      return 'ALWAYS_RESTRICTED'
     case 'Reserverad p-plats rörelsehindrad':
       return 'ALWAYS_RESTRICTED'
     case 'Tidsreglerat parkerings-/stoppförbud':
       return 'TIME_RESTRICTED'
   }
 }
-const getWeekday = weekday => {
+const getWeekday = (weekday) => {
   switch (weekday) {
     case 'måndag':
       return 1
@@ -41,7 +41,7 @@ const getWeekday = weekday => {
   }
 }
 
-const getTime = time => {
+const getTime = (time) => {
   if (time === undefined) return undefined
   time = '' + time
   switch (time.length) {
@@ -56,7 +56,7 @@ const getTime = time => {
   }
 }
 
-const getVehicleType = vehicle => {
+const getVehicleType = (vehicle) => {
   switch (vehicle) {
     case 'fordon':
       return 'CAR'
@@ -71,5 +71,5 @@ module.exports = {
   getRegulationType: getRegulationType,
   getWeekday: getWeekday,
   getTime: getTime,
-  getVehicleType: getVehicleType
+  getVehicleType: getVehicleType,
 }
