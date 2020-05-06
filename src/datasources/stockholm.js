@@ -26,7 +26,7 @@ class StockholmAPI extends CityAPI {
     /* Check that the odd/even week is correct */
 
     if (prop.ODD_EVEN) {
-      if ((moment(this.time).week() + 1) % 2 !== checkOddEvenWeek(prop.ODD_EVEN)) return false
+      if (moment(this.time).week() % 2 !== checkOddEvenWeek(prop.ODD_EVEN)) return false
     }
 
     /* Check that the date is within start & end month. If they don't exist then it's valid all year round */
