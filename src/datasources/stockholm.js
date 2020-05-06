@@ -8,7 +8,7 @@ import {
   getRegulationType,
   getWeekday,
   getTime,
-  getVehicleType
+  getVehicleType,
 } from '../lib/helpers/stockholmHelper.js'
 dotenv.config()
 
@@ -24,8 +24,9 @@ class StockholmAPI extends CityAPI {
 
   regulationIsValid(prop) {
     /* Check that the odd/even week is correct */
+
     if (prop.ODD_EVEN) {
-      if ((moment().week() + 1) % 2 !== checkOddEvenWeek(prop.ODD_EVEN)) return false
+      if ((moment(this.time).week() + 1) % 2 !== checkOddEvenWeek(prop.ODD_EVEN)) return false
     }
 
     /* Check that the date is within start & end month. If they don't exist then it's valid all year round */
@@ -35,7 +36,6 @@ class StockholmAPI extends CityAPI {
       const validTo = moment(`${today.year()}-${prop.END_MONTH}-${prop.END_DAY}`, 'YYYY-M-D')
       if (validFrom > validTo) validFrom.subtract(1, 'y')
 
-      // console.log('From: ', validFrom.format(), ', to: ', validTo.format())
       if (validFrom > today || validTo < today) return false
     }
 
@@ -74,13 +74,13 @@ class StockholmAPI extends CityAPI {
     this.time = time
     console.log(url)
 
-    return axios.get(url).then(response => {
+    return axios.get(url).then((response) => {
       if (apiVersion === 'v1') {
         return response.data
       } else if (apiVersion === 'v2') {
-        let newFormat = response.data.features.filter(feature => this.regulationIsValid(feature.properties))
+        let newFormat = response.data.features.filter((feature) => this.regulationIsValid(feature.properties))
 
-        return newFormat.map(feature => {
+        return newFormat.map((feature) => {
           const res = this.stockholmReducer(feature)
           return res
         })

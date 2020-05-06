@@ -34,12 +34,13 @@ class Regulation {
       endTime = '0000'
     }
 
-    console.log('String: ', usersTime)
-    const usersTimeFormatted = momentTz.tz(usersTime, 'Europe/Stockholm')
-    console.log('Moment: ', usersTimeFormatted.format())
-    const todayWeekday = usersTimeFormatted.isoWeekday()
+    if (this.type === 'TIME_RESTRICTED') {
+      endWeekday = 8
+    }
 
-    //console.log(`StartWeekday: ${startWeekday}, TodaysWeekday: ${todayWeekday}, EndWeekday: ${endWeekday}`)
+    const usersTimeFormatted = momentTz.tz(usersTime, 'Europe/Stockholm')
+
+    const todayWeekday = usersTimeFormatted.isoWeekday()
 
     const startWeekdayDiff = startWeekday - todayWeekday
     const endWeekdayDiff = endWeekday - todayWeekday
@@ -65,15 +66,12 @@ class Regulation {
       endDateNew.subtract(7, 'd')
     }
 
-    console.log(
-      `StartDateNew: ${startDateNew.format()}, , Today: ${usersTimeFormatted.format()}, EndDateNew: ${endDateNew.format()}`
-    )
+    // console.log(
+    //   `StartDateNew: ${startDateNew.format()}, , Today: ${usersTimeFormatted.format()}, EndDateNew: ${endDateNew.format()}`
+    // )
 
     this.parkingAllowedTime.start = startDateNew.format()
     this.parkingAllowedTime.end = endDateNew.format()
-    // console.log(
-    //   `StartDate: ${startDate.format()}, , Today: ${usersTimeFormatted.format()}, EndDate: ${endDate.format()}`
-    // )
   }
 }
 
