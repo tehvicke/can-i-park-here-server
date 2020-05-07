@@ -32,10 +32,10 @@ class Regulation {
       startTime = '0000'
       endWeekday = 1
       endTime = '0000'
-    }
 
-    if (this.type === 'TIME_RESTRICTED') {
-      endWeekday = 8
+      if (this.type === 'TIME_RESTRICTED') {
+        endWeekday = 8
+      }
     }
 
     const usersTimeFormatted = momentTz.tz(usersTime, 'Europe/Stockholm')
