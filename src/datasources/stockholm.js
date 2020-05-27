@@ -80,6 +80,22 @@ class StockholmAPI extends CityAPI {
       } else if (apiVersion === 'v2') {
         let newFormat = response.data.features.filter((feature) => this.regulationIsValid(feature.properties))
 
+        // /* New stuff for two weeks */
+
+        // console.log(newFormat)
+        const groups = newFormat.reduce((citationGroups, citation) => {
+          const featureId = citation.properties.FEATURE_OBJECT_ID
+          if (!citationGroups[featureId]) {
+            citationGroups[featureId] = []
+          }
+          citationGroups[featureId].push(citation)
+
+          return citationGroups
+        })
+
+        console.log(groups)
+        // /* End new stuff */
+
         return newFormat.map((feature) => {
           const res = this.stockholmReducer(feature)
           return res
