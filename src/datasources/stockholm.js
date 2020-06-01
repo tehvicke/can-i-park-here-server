@@ -9,6 +9,7 @@ import {
   getWeekday,
   getTime,
   getVehicleType,
+  getParkingAllowedTime,
 } from '../lib/helpers/stockholmHelper.js'
 dotenv.config()
 
@@ -23,12 +24,6 @@ class StockholmAPI extends CityAPI {
   }
 
   regulationIsValid(prop) {
-    /* Check that the odd/even week is correct */
-
-    if (prop.ODD_EVEN) {
-      if (moment(this.time).week() % 2 !== checkOddEvenWeek(prop.ODD_EVEN)) return false
-    }
-
     /* Check that the date is within start & end month. If they don't exist then it's valid all year round */
     if (prop.START_MONTH && prop.END_MONTH) {
       const today = moment()
@@ -42,7 +37,11 @@ class StockholmAPI extends CityAPI {
     return true
   }
 
-  stockholmReducer(data) {
+  stockholmReducer(featureGroup) {
+    let data = featureGroup
+    // if (featureGroup.length === 1) data = featureGroup[0]
+    // const oddEven = checkOddEvenWeek(data.properties.ODD_EVEN)
+
     const regulation = new Regulation(
       data.id,
       getRegulationType(data.properties.VF_PLATS_TYP),
@@ -57,17 +56,41 @@ class StockholmAPI extends CityAPI {
     const endWeekday =
       data.properties.END_WEEKDAY ||
       data.properties
-        .START_WEEKDAY /* For most cases start and end weekday will be the same, so end will get value of start_weekday */
-    regulation.setParkingAllowedTime(
+        .START_WEEKDAY /* In most cases start and end weekday will be the same, so end will get value of start_weekday */
+
+    /* New stuff */
+
+    const parkingTimes = getParkingAllowedTime(
       getWeekday(data.properties.START_WEEKDAY),
       getTime(data.properties.START_TIME),
       getWeekday(endWeekday) + 7,
       getTime(data.properties.END_TIME),
-      this.time
+      this.time,
+      getRegulationType(data.properties.VF_PLATS_TYP)
     )
+
+    regulation.setParkingAllowedTime(parkingTimes)
     data.properties = regulation
+
+    const mergedFeature = {
+      type: 'Feature',
+      id: 'XXX',
+      geometry: { 1: 1 },
+      geometry_name: 'GEOMETRY',
+      properties: { 1: 1 },
+    }
+
+    /* End new stuff */
     return data
   }
+
+  /*
+   * Algoritm
+   * Om JÄMN vecka (får stå hela veckan) - så blir det START_WEEKDAY - 7 dagar som start och START_WEEKDAY + 7 dagar som slut (med tid också)
+   * Om UDDA vecka INNAN end time (dvs innan tiden på START_WEEKDAY) så blir det START_WEEKDAY - 14 som start och START_WEEKDAY som slut
+   * Om UDDA vecka EFTER end time (dvs efter tiden på START_WEEKDAY) så blir det START_WEEKDAY som start och START_WEEKDAY + 14 som slut
+   *
+   */
 
   getDataWithin(lat, long, radius, time, apiVersion) {
     const url = `${this.baseURL}?radius=${radius}&lat=${lat}&lng=${long}&maxFeatures=${this.maxFeatures}&outputFormat=${this.format}&apiKey=${this.apiKey}`
@@ -78,26 +101,40 @@ class StockholmAPI extends CityAPI {
       if (apiVersion === 'v1') {
         return response.data
       } else if (apiVersion === 'v2') {
+        /* Filter out all non valid (i.e. 'winter' regulations if during summer, and vice versa) */
         let newFormat = response.data.features.filter((feature) => this.regulationIsValid(feature.properties))
 
         // /* New stuff for two weeks */
 
-        // console.log(newFormat)
+        /* Group all regulations that regard the same feature (i.e. group odd+even week regulations) */
+
         const groups = newFormat.reduce((citationGroups, citation) => {
+          // if (citation.id === 'LTFR_P_TILLATEN.30808590') console.log(citation)
           const featureId = citation.properties.FEATURE_OBJECT_ID
+
           if (!citationGroups[featureId]) {
             citationGroups[featureId] = []
           }
           citationGroups[featureId].push(citation)
+          // console.log(citationGroups[featureId])
 
           return citationGroups
+        }, {})
+
+        /* Loop over each group to create final set of regulation (i.e. odd+even merged into one) */
+        Object.keys(groups).forEach((key) => {
+          console.log('key: ', key) // the name of the current key.
+
+          const group = groups[key]
+          console.log('group:')
+          console.log(group) // the value of the current key.
         })
 
-        console.log(groups)
         // /* End new stuff */
 
         return newFormat.map((feature) => {
           const res = this.stockholmReducer(feature)
+          // console.log(res)
           return res
         })
       }

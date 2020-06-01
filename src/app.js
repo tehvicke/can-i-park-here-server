@@ -7,13 +7,13 @@ import cors from 'cors'
 const testA = {
   lat: 59.331117,
   long: 18.005072,
-  radius: 50
+  radius: 50,
 }
 /* Lat/Long Oslo, Rubina Ranas gate 14-12 */
 const testB = {
   lat: 59.911311,
   long: 10.764739,
-  radius: 100
+  radius: 100,
 }
 const app = express()
 app.use(cors())
@@ -50,6 +50,7 @@ app.use((req, res, next) => {
 })
 
 app.use((err, req, res, next) => {
+  console.log(err.message)
   res.status(500).json({ error: err.message })
 })
 
