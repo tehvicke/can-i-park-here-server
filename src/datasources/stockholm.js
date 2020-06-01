@@ -9,6 +9,7 @@ import {
   getWeekday,
   getTime,
   getVehicleType,
+  getParkingAllowedTime,
 } from '../lib/helpers/stockholmHelper.js'
 dotenv.config()
 
@@ -23,12 +24,6 @@ class StockholmAPI extends CityAPI {
   }
 
   regulationIsValid(prop) {
-    /* Check that the odd/even week is correct */
-
-    if (prop.ODD_EVEN) {
-      if (moment(this.time).week() % 2 !== checkOddEvenWeek(prop.ODD_EVEN)) return false
-    }
-
     /* Check that the date is within start & end month. If they don't exist then it's valid all year round */
     if (prop.START_MONTH && prop.END_MONTH) {
       const today = moment()
@@ -42,7 +37,21 @@ class StockholmAPI extends CityAPI {
     return true
   }
 
-  stockholmReducer(data) {
+  stockholmReducer(featureGroup) {
+    let data
+    /* The features in a group contain 99% the same data. We decide which one contains the last 1% of the data (i.e. the start/end times)*/
+    if (featureGroup.length === 1) {
+      data = featureGroup[0]
+    } else {
+      featureGroup.forEach((feature) => {
+        /* In Stockholm during summer time regulations, ODD weeks are the ones where you're not allowed to park a specific day, so we look specifically at them. */
+        if (feature.properties.ODD_EVEN) {
+          if (checkOddEvenWeek(feature.properties.ODD_EVEN) % 2 === 1) data = feature
+        }
+      })
+    }
+
+    /* Create a regulation with relevant data */
     const regulation = new Regulation(
       data.id,
       getRegulationType(data.properties.VF_PLATS_TYP),
@@ -57,15 +66,25 @@ class StockholmAPI extends CityAPI {
     const endWeekday =
       data.properties.END_WEEKDAY ||
       data.properties
-        .START_WEEKDAY /* For most cases start and end weekday will be the same, so end will get value of start_weekday */
-    regulation.setParkingAllowedTime(
+        .START_WEEKDAY /* In most cases start and end weekday will be the same, so end will get value of start_weekday */
+
+    /* If only one regulation exist then it's assumed to be weekly. Otherwise two regulations regard the same places but for odd and even weeks respectively, hence 7 * 2 days apart */
+    const endWeekDayNumber = 7 * featureGroup.length
+    /* New stuff */
+
+    const parkingTimes = getParkingAllowedTime(
       getWeekday(data.properties.START_WEEKDAY),
       getTime(data.properties.START_TIME),
-      getWeekday(endWeekday) + 7,
+      getWeekday(endWeekday) + endWeekDayNumber,
       getTime(data.properties.END_TIME),
-      this.time
+      this.time,
+      getRegulationType(data.properties.VF_PLATS_TYP)
     )
+
+    regulation.setParkingAllowedTime(parkingTimes)
     data.properties = regulation
+
+    /* End new stuff */
     return data
   }
 
@@ -78,12 +97,36 @@ class StockholmAPI extends CityAPI {
       if (apiVersion === 'v1') {
         return response.data
       } else if (apiVersion === 'v2') {
+        /* Filter out all non valid (i.e. 'winter' regulations if during summer, and vice versa) */
         let newFormat = response.data.features.filter((feature) => this.regulationIsValid(feature.properties))
 
-        return newFormat.map((feature) => {
-          const res = this.stockholmReducer(feature)
-          return res
+        // /* New stuff for two weeks */
+
+        /* Group all regulations that regard the same feature (i.e. group odd+even week regulations) */
+        const groups = newFormat.reduce((citationGroups, citation) => {
+          const featureId = citation.properties.FEATURE_OBJECT_ID
+          if (!citationGroups[featureId]) citationGroups[featureId] = []
+          citationGroups[featureId].push(citation)
+          return citationGroups
+        }, {})
+
+        /* Loop over each group to create final set of regulation (i.e. odd+even merged into one) */
+        const finalFeatureSet = []
+        Object.keys(groups).forEach((key) => {
+          const group = groups[key]
+          finalFeatureSet.push(this.stockholmReducer(group))
         })
+
+        // console.log(finalFeatureSet)
+        return finalFeatureSet
+
+        // /* End new stuff */
+
+        // return newFormat.map((feature) => {
+        //   const res = this.stockholmReducer([feature])
+        //   // console.log(res)
+        //   return res
+        // })
       }
     })
   }
