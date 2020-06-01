@@ -71,6 +71,13 @@ const getVehicleType = (vehicle) => {
   }
 }
 
+/**
+ * Start and end times for when it's forbidden to park
+ * @param {Number Weekday when the citation is active (i.e. forbidden to park)} startWeekday
+ * @param {Date Time on startWeekday wafter which the citation is active (i.e. forbidden to park). 1 = Monday} startTime
+ * @param {Number Weekday when the citation is active (i.e. forbidden to park. Defaulsts to startWeekday if undefined} endWeekday
+ * @param {Date Time on endWeekday after which the citation is no longer active (i.e. allowed to park again)} endTime
+ */
 const getParkingAllowedTime = (startWeekday, startTime, endWeekday, endTime, usersTime, type) => {
   if (!startWeekday && !startTime && !endWeekday && !endTime) {
     /* If these values are missing then parking is never allowed */
@@ -105,22 +112,41 @@ const getParkingAllowedTime = (startWeekday, startTime, endWeekday, endTime, use
   let endDate = moment(endDateString + ' ' + endTime, 'YYYY-MM-DD hhmm')
 
   /* Adjust period to the week before if startTime is after the users time */
-  if (usersTimeFormatted < startDate) {
-    startDate.subtract(7, 'd')
-    endDate.subtract(7, 'd')
-    startDateNew.subtract(7, 'd')
-    endDateNew.subtract(7, 'd')
+
+  /* Choose to adjust 7 or 14 days depending on odd or even week currently (14 if odd) */
+
+  let adjustDays = 14
+  if (usersTimeFormatted.isoWeek() % 2 === 0) {
+    adjustDays = 7
+  } else {
+    adjustDays = 14
   }
 
-  // console.log(
-  //   `StartDateNew: ${startDateNew.format()}, , Today: ${usersTimeFormatted.format()}, EndDateNew: ${endDateNew.format()}`
-  // )
+  console.log(adjustDays)
+  if (usersTimeFormatted < startDate || usersTimeFormatted.isoWeek() % 2 === 0) {
+    startDate.subtract(adjustDays, 'd')
+    endDate.subtract(adjustDays, 'd')
+    startDateNew.subtract(adjustDays, 'd')
+    endDateNew.subtract(adjustDays, 'd')
+  }
+
+  console.log(
+    `StartDateNew: ${startDateNew.format()}, , Today: ${usersTimeFormatted.format()}, EndDateNew: ${endDateNew.format()}`
+  )
 
   return {
     start: startDateNew.format(),
     end: endDateNew.format(),
   }
 }
+
+/*
+ * Algoritm
+ * Om JÄMN vecka (får stå hela veckan) - så blir det START_WEEKDAY - 7 dagar som start och START_WEEKDAY + 7 dagar som slut (med tid också)
+ * Om UDDA vecka INNAN end time (dvs innan tiden på START_WEEKDAY) så blir det START_WEEKDAY - 14 som start och START_WEEKDAY som slut
+ * Om UDDA vecka EFTER end time (dvs efter tiden på START_WEEKDAY) så blir det START_WEEKDAY som start och START_WEEKDAY + 14 som slut
+ *
+ */
 
 module.exports = {
   checkOddEvenWeek: checkOddEvenWeek,

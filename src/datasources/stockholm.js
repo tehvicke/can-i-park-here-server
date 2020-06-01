@@ -38,10 +38,20 @@ class StockholmAPI extends CityAPI {
   }
 
   stockholmReducer(featureGroup) {
-    let data = featureGroup
-    // if (featureGroup.length === 1) data = featureGroup[0]
-    // const oddEven = checkOddEvenWeek(data.properties.ODD_EVEN)
+    let data
+    /* The features in a group contain 99% the same data. We decide which one contains the last 1% of the data (i.e. the start/end times)*/
+    if (featureGroup.length === 1) {
+      data = featureGroup[0]
+    } else {
+      featureGroup.forEach((feature) => {
+        /* In Stockholm during summer time regulations, ODD weeks are the ones where you're not allowed to park a specific day, so we look specifically at them. */
+        if (feature.properties.ODD_EVEN) {
+          if (checkOddEvenWeek(feature.properties.ODD_EVEN) % 2 === 1) data = feature
+        }
+      })
+    }
 
+    /* Create a regulation with relevant data */
     const regulation = new Regulation(
       data.id,
       getRegulationType(data.properties.VF_PLATS_TYP),
@@ -58,12 +68,14 @@ class StockholmAPI extends CityAPI {
       data.properties
         .START_WEEKDAY /* In most cases start and end weekday will be the same, so end will get value of start_weekday */
 
+    /* If only one regulation exist then it's assumed to be weekly. Otherwise two regulations regard the same places but for odd and even weeks respectively, hence 7 * 2 days apart */
+    const endWeekDayNumber = 7 * featureGroup.length
     /* New stuff */
 
     const parkingTimes = getParkingAllowedTime(
       getWeekday(data.properties.START_WEEKDAY),
       getTime(data.properties.START_TIME),
-      getWeekday(endWeekday) + 7,
+      getWeekday(endWeekday) + endWeekDayNumber,
       getTime(data.properties.END_TIME),
       this.time,
       getRegulationType(data.properties.VF_PLATS_TYP)
@@ -72,25 +84,9 @@ class StockholmAPI extends CityAPI {
     regulation.setParkingAllowedTime(parkingTimes)
     data.properties = regulation
 
-    const mergedFeature = {
-      type: 'Feature',
-      id: 'XXX',
-      geometry: { 1: 1 },
-      geometry_name: 'GEOMETRY',
-      properties: { 1: 1 },
-    }
-
     /* End new stuff */
     return data
   }
-
-  /*
-   * Algoritm
-   * Om JÄMN vecka (får stå hela veckan) - så blir det START_WEEKDAY - 7 dagar som start och START_WEEKDAY + 7 dagar som slut (med tid också)
-   * Om UDDA vecka INNAN end time (dvs innan tiden på START_WEEKDAY) så blir det START_WEEKDAY - 14 som start och START_WEEKDAY som slut
-   * Om UDDA vecka EFTER end time (dvs efter tiden på START_WEEKDAY) så blir det START_WEEKDAY som start och START_WEEKDAY + 14 som slut
-   *
-   */
 
   getDataWithin(lat, long, radius, time, apiVersion) {
     const url = `${this.baseURL}?radius=${radius}&lat=${lat}&lng=${long}&maxFeatures=${this.maxFeatures}&outputFormat=${this.format}&apiKey=${this.apiKey}`
@@ -107,36 +103,30 @@ class StockholmAPI extends CityAPI {
         // /* New stuff for two weeks */
 
         /* Group all regulations that regard the same feature (i.e. group odd+even week regulations) */
-
         const groups = newFormat.reduce((citationGroups, citation) => {
-          // if (citation.id === 'LTFR_P_TILLATEN.30808590') console.log(citation)
           const featureId = citation.properties.FEATURE_OBJECT_ID
-
-          if (!citationGroups[featureId]) {
-            citationGroups[featureId] = []
-          }
+          if (!citationGroups[featureId]) citationGroups[featureId] = []
           citationGroups[featureId].push(citation)
-          // console.log(citationGroups[featureId])
-
           return citationGroups
         }, {})
 
         /* Loop over each group to create final set of regulation (i.e. odd+even merged into one) */
+        const finalFeatureSet = []
         Object.keys(groups).forEach((key) => {
-          console.log('key: ', key) // the name of the current key.
-
           const group = groups[key]
-          console.log('group:')
-          console.log(group) // the value of the current key.
+          finalFeatureSet.push(this.stockholmReducer(group))
         })
+
+        // console.log(finalFeatureSet)
+        return finalFeatureSet
 
         // /* End new stuff */
 
-        return newFormat.map((feature) => {
-          const res = this.stockholmReducer(feature)
-          // console.log(res)
-          return res
-        })
+        // return newFormat.map((feature) => {
+        //   const res = this.stockholmReducer([feature])
+        //   // console.log(res)
+        //   return res
+        // })
       }
     })
   }
